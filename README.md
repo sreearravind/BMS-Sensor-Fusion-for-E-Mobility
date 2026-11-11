@@ -36,3 +36,117 @@ Uses the fused current and measured terminal voltage to estimate SOC through a 1
 V_terminal = OCV(SOC) - I * R0 - V1
 dSOC/dt    = -I / (3600 * Q_nom)
 dV1/dt     = -V1 / (R1*C1) + I / C1
+````
+
+The EKF combines coulomb counting with the OCV-based voltage measurement, correcting an initially wrong SOC estimate.
+
+---
+
+## Requirements
+
+- Python 3.8+
+- NumPy
+- Matplotlib (optional, only for plotting)
+
+Install dependencies:
+
+```bash
+pip install numpy matplotlib
+```
+
+---
+
+## Usage
+
+Clone the repository and run the main script:
+
+```bash
+python bms_fusion.py
+```
+
+The script runs a 3000-second simulation at 1 Hz and prints a summary similar to:
+
+```text
+==============================================================
+ BMS SENSOR FUSION  -  RUN SUMMARY
+==============================================================
+ Simulation length          : 3000 s @ 1 Hz
+ Cell capacity              : 2.50 Ah
+ Final true / estimated SOC :  18.4 % /  18.6 %
+--------------------------------------------------------------
+ SOC RMSE  (t > 300 s)      :  0.45 %
+ SOC max |error|            :  1.20 %
+ Pack temperature RMSE      :  0.18 degC
+--------------------------------------------------------------
+ Faulty NTC4 rejected       : 1498 / 1500 samples after fault (99.9 %)
+ Current plausibility flags : 0
+==============================================================
+```
+
+If Matplotlib is installed, the script also saves:
+
+```text
+bms_fusion_results.png
+```
+
+---
+
+## Project Structure
+
+```text
+.
+├── bms_fusion.py          # Main simulation and fusion algorithms
+├── README.md              # This file
+└── bms_fusion_results.png # Generated plot (optional)
+```
+
+---
+
+## Customization
+
+You can easily modify the demo:
+
+- Change the random seed:
+
+  ```python
+  rng = np.random.default_rng(42)
+  ```
+
+- Change when the faulty NTC sensor starts biasing:
+
+  ```python
+  fault_started_at = 1500
+  ```
+
+- Tune sensor noise levels in:
+
+  ```python
+  RobustTemperatureFusion(sensor_var={...})
+  CurrentFusion(var_shunt=..., var_hall=...)
+  ```
+
+- Tune EKF process and measurement noise:
+
+  ```python
+  SOCEKF(model, soc0=0.85, p0_soc=0.10, q_soc=0.002, r_volt=0.010)
+  ```
+
+---
+
+## Disclaimer
+
+This project is an educational simulation. It is **not** a certified BMS implementation and must not be used as-is in real battery systems, vehicles, or safety-critical applications. Real BMS designs require cell-level protection, functional safety analysis, hardware validation, and compliance with applicable standards.
+
+---
+
+## License
+
+MIT License. See `LICENSE` for details.
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome. For major changes, please open an issue first to discuss the proposed change.
+
+````
